@@ -1,12 +1,12 @@
 import cv2
 import pytesseract
-pytesseract.pytesseract.tesseract_cmd = r"C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
 import tkinter as tk
 from tkinter import filedialog, messagebox
-
 from PIL import Image, ImageTk
 import os
 
+# Path to the Tesseract executable
+pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 displayed_image = None
 
@@ -15,10 +15,8 @@ def process_image(image):
     if image is not None and len(image.shape) == 2:  
         extracted_text = pytesseract.image_to_string(image)
 
-
         h, w = image.shape
 
-        
         for b in pytesseract.image_to_boxes(image).splitlines():
             b = b.split()
             x, y, x2, y2 = int(b[1]), h - int(b[2]), int(b[3]), h - int(b[4])
@@ -28,7 +26,6 @@ def process_image(image):
         pil_image = Image.fromarray(processed_image)
         displayed_image = pil_image  
 
-       
         pil_image = pil_image.resize((400, 400), resample=Image.LANCZOS)
         img_tk = ImageTk.PhotoImage(image=pil_image)
 
@@ -49,19 +46,16 @@ def copy_to_clipboard():
     root.clipboard_append(text)
     messagebox.showinfo("Copy Successful", "Text copied to clipboard.")
 
-
 def save_as_file():
     text = text_output.get("1.0", tk.END)
     try:
-       
-        file_path = filedialog.asksaveasfilename(initialdir=os.path.join(os.path.expanduser('~'), 'Desktop', 'acad', 'Trying to run The EastOCR', 'Saved Data Folder'), title="Save As", filetypes=(("Text files", "*.txt"), ("All files", "*.*")))
+        file_path = filedialog.asksaveasfilename(initialdir=os.path.join(os.path.expanduser('~'), 'Desktop'), title="Save As", filetypes=(("Text files", "*.txt"), ("All files", "*.*")))
         if file_path:
             with open(file_path, "w") as file:
                 file.write(text)
             messagebox.showinfo("Save Successful", f"Text saved to {file_path} successfully.")
     except Exception as e:
         messagebox.showerror("Error", f"An error occurred while saving the file: {e}")
-
 
 def load_and_convert_image():
     file_path = filedialog.askopenfilename()
@@ -75,28 +69,23 @@ def load_and_convert_image():
     else:
         messagebox.showerror("Error", "No image selected.")
 
-
 def capture_image():
     cap = cv2.VideoCapture(0)
-   
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
     ret, frame = cap.read()
     cap.release()
     if ret:
-       
         gray_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         process_image(gray_image)
     else:
         messagebox.showerror("Error", "Failed to capture image from camera.")
 
-
 def save_image():
     global displayed_image
     if displayed_image:
         try:
-            
-            file_path = filedialog.asksaveasfilename(initialdir=os.path.join(os.path.expanduser('~'), 'Desktop', 'acad', 'Trying to run The EastOCR', 'Saved Images Folder'), title="Save Image", filetypes=(("PNG files", "*.png"), ("JPEG files", "*.jpg"), ("All files", "*.*")), defaultextension=".png")
+            file_path = filedialog.asksaveasfilename(initialdir=os.path.join(os.path.expanduser('~'), 'Desktop'), title="Save Image", filetypes=(("PNG files", "*.png"), ("JPEG files", "*.jpg"), ("All files", "*.*")), defaultextension=".png")
             if file_path:
                 displayed_image.save(file_path)
                 messagebox.showinfo("Save Successful", f"Image saved to {file_path} successfully.")
